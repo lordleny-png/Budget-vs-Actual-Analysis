@@ -13,7 +13,7 @@ st.title("📊 Budget vs Actual Analysis")
 st.caption("Financial performance | Budget monitoring | Business insights")
 
 # Load the dataset automatically
-df = pd.read_csv("budget_vs_actual.csv")
+df = pd.read_csv("Financial analysis_Data Set.csv")
 
 budget = df[df["Expenses"] == "Budget"].set_index("Month")
 actual = df[df["Expenses"] == "Actual"].set_index("Month")
