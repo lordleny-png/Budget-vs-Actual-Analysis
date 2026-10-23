@@ -9,11 +9,6 @@ Développé avec Python et Streamlit, ce projet propose un tableau de bord inter
 
 Voici un aperçu du tableau de bord interactif développé avec Python et Streamlit pour analyser les écarts entre les dépenses budgétisées et les dépenses réelles.
 
-![Tableau de bord Budget vs Actual Analysis](budget_vs_actual_dashboard.png)
-
-🔗 **[Accéder au tableau de bord interactif](TON_LIEN_STREAMLIT)
-
-
 ## 🎯 Objectifs du projet
 
 - Comparer les dépenses prévisionnelles aux dépenses réelles.
