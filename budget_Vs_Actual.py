@@ -10,22 +10,49 @@ st.set_page_config(
 )
 
 # Custom design
+
+# Clean and readable dashboard design
 st.markdown("""
 <style>
-.stApp {background-color: #F4F7FB;}
-[data-testid="stSidebar"] {background-color: #14213D;}
-[data-testid="stSidebar"] * {color: white;}
+.stApp {
+    background-color: #F4F7FB;
+    color: #243047;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #E8EEF7;
+}
+
+[data-testid="stSidebar"] * {
+    color: #243047 !important;
+}
+
+h1, h2, h3, p, label {
+    color: #243047;
+}
+
 div[data-testid="stMetric"] {
-    background: white;
+    background-color: #FFFFFF;
     padding: 18px;
     border-radius: 12px;
-    border-left: 5px solid #4361EE;
-    box-shadow: 0 2px 8px #DDE3EC;
+    border: 1px solid #D8E0EC;
+    box-shadow: 0 2px 8px rgba(20, 33, 61, 0.08);
 }
-h1 {color: #14213D;}
-h2, h3 {color: #243B64;}
+
+div[data-testid="stMetricLabel"] {
+    color: #52627A !important;
+}
+
+div[data-testid="stMetricValue"] {
+    color: #14213D !important;
+}
+
+.stAlert {
+    color: #243047 !important;
+}
 </style>
 """, unsafe_allow_html=True)
+
 
 # Header
 st.title("📊 Budget vs Actual Analysis")
