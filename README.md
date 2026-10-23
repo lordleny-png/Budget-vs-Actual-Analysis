@@ -5,6 +5,10 @@
 This project analyzes budgeted and actual expenses over 12 months in 2023 to evaluate financial performance, identify spending variances, and support data-driven business decisions.
 
 An interactive dashboard built with Python and Streamlit enables users to compare planned spending with actual expenses, explore cost categories, and identify potential overspending.
+## 📸 Dashboard Preview
+
+![Budget vs Actual Analysis Dashboard](budget_vs_actual_dashboard.png)
+
 
 ## 🎯 Project Objectives
 
@@ -104,10 +108,6 @@ An interactive dashboard built with Python and Streamlit enables users to compar
 - Review budget assumptions and spending forecasts regularly.
 - Maintain appropriate cost controls without compromising essential business activities.
 - Use variance analysis to improve future budgeting and resource allocation.
-## 📸 Dashboard Preview
-
-![Budget vs Actual Analysis Dashboard](budget_vs_actual_dashboard.png)
-
 
 ## 🚀 Interactive Dashboard
 
