@@ -9,61 +9,110 @@ st.set_page_config(
     layout="wide"
 )
 
+# Custom design
+st.markdown("""
+<style>
+.stApp {background-color: #F4F7FB;}
+[data-testid="stSidebar"] {background-color: #14213D;}
+[data-testid="stSidebar"] * {color: white;}
+div[data-testid="stMetric"] {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    border-left: 5px solid #4361EE;
+    box-shadow: 0 2px 8px #DDE3EC;
+}
+h1 {color: #14213D;}
+h2, h3 {color: #243B64;}
+</style>
+""", unsafe_allow_html=True)
+
+# Header
 st.title("📊 Budget vs Actual Analysis")
 st.caption("Financial performance | Budget monitoring | Business insights")
 
-# Load the dataset automatically
+# Load data
 df = pd.read_csv("Financial analysis_Data Set.csv")
-
-budget = df[df["Expenses"] == "Budget"].set_index("Month")
-actual = df[df["Expenses"] == "Actual"].set_index("Month")
+df["Month"] = pd.to_datetime(df["Month"])
 
 categories = [
     c for c in df.columns
     if c not in ["Month", "Expenses"]
 ]
 
-budget_total = budget[categories].sum().sum()
-actual_total = actual[categories].sum().sum()
+# Sidebar filters
+st.sidebar.title("⚙️ Dashboard Filters")
+
+months = sorted(df["Month"].unique())
+selected_months = st.sidebar.multiselect(
+    "Select months",
+    months,
+    default=months,
+    format_func=lambda x: x.strftime("%b %Y")
+)
+
+selected_categories = st.sidebar.multiselect(
+    "Select cost categories",
+    categories,
+    default=categories
+)
+
+if not selected_months or not selected_categories:
+    st.warning("Please select at least one month and one category.")
+    st.stop()
+
+# Filter data
+filtered = df[df["Month"].isin(selected_months)]
+budget = filtered[filtered["Expenses"] == "Budget"].set_index("Month")
+actual = filtered[filtered["Expenses"] == "Actual"].set_index("Month")
+
+budget_total = budget[selected_categories].sum().sum()
+actual_total = actual[selected_categories].sum().sum()
 variance = actual_total - budget_total
-execution_rate = actual_total / budget_total * 100
+execution = actual_total / budget_total * 100 if budget_total else 0
 
 # KPI cards
+st.subheader("📌 Financial Overview")
+
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Total Budget", f"{budget_total:,.0f}")
 c2.metric("Actual Expenses", f"{actual_total:,.0f}")
 c3.metric("Variance", f"{variance:,.0f}")
-c4.metric("Budget Execution", f"{execution_rate:.2f}%")
+c4.metric("Budget Execution", f"{execution:.2f}%")
 
 # Monthly comparison
 st.subheader("📅 Monthly Budget vs Actual")
 
 monthly = pd.DataFrame({
     "Month": budget.index,
-    "Budget": budget[categories].sum(axis=1).values,
-    "Actual": actual[categories].sum(axis=1).values
+    "Budget": budget[selected_categories].sum(axis=1).values,
+    "Actual": actual[selected_categories].sum(axis=1).values
 })
 
-monthly["Month"] = pd.to_datetime(monthly["Month"])
-
-chart = px.bar(
+monthly_chart = px.bar(
     monthly, x="Month", y=["Budget", "Actual"],
     barmode="group",
-    color_discrete_sequence=["royalblue", "orange"],
-    title="Monthly Spending Comparison"
+    color_discrete_sequence=["#4361EE", "#F4A261"],
+    template="plotly_white"
 )
-st.plotly_chart(chart, use_container_width=True)
+monthly_chart.update_layout(
+    legend_title_text="Financial Measure",
+    xaxis_title="Month",
+    yaxis_title="Amount",
+    margin=dict(t=25, b=20)
+)
+st.plotly_chart(monthly_chart, use_container_width=True)
 
-# Category variance
+# Category analysis
 st.subheader("💰 Variance by Cost Category")
 
-category_budget = budget[categories].sum()
-category_actual = actual[categories].sum()
+category_budget = budget[selected_categories].sum()
+category_actual = actual[selected_categories].sum()
 category_variance = category_actual - category_budget
 
 category_df = pd.DataFrame({
-    "Category": categories,
-    "Variance": category_variance.values
+    "Category": selected_categories,
+    "Variance": [category_variance[c] for c in selected_categories]
 })
 
 category_df["Status"] = category_df["Variance"].apply(
@@ -72,48 +121,53 @@ category_df["Status"] = category_df["Variance"].apply(
     else "On Budget"
 )
 
-chart = px.bar(
+category_chart = px.bar(
     category_df, x="Category", y="Variance",
     color="Status",
     color_discrete_map={
-        "Overspending": "red",
-        "Under Budget": "green",
-        "On Budget": "royalblue"
+        "Overspending": "#E63946",
+        "Under Budget": "#2A9D8F",
+        "On Budget": "#4361EE"
     },
-    title="Spending Variance by Category"
+    template="plotly_white"
 )
-st.plotly_chart(chart, use_container_width=True)
+category_chart.update_layout(
+    xaxis_title="Cost Category",
+    yaxis_title="Variance",
+    showlegend=True
+)
+st.plotly_chart(category_chart, use_container_width=True)
 
 # Summary table
-st.subheader("📋 Category Summary")
+st.subheader("📋 Detailed Category Summary")
 
 summary = pd.DataFrame({
     "Budget": category_budget,
     "Actual": category_actual,
-    "Variance": category_variance,
-    "Variance (%)": category_variance / category_budget * 100
+    "Variance": category_variance
 })
-
+summary["Variance (%)"] = (
+    summary["Variance"] / summary["Budget"].replace(0, float("nan")) * 100
+)
 st.dataframe(summary.round(2), use_container_width=True)
 
 # Business insights
-st.subheader("🔎 Key Business Insights")
+st.subheader("🔎 Business Insights")
 
-st.write(
-    f"Overall budget execution was {execution_rate:.2f}%."
-)
+overruns = category_variance[category_variance > 0]
 
-st.write(
-    f"Total spending was {abs(variance):,.0f} "
-    + ("below budget." if variance < 0 else "above budget.")
-)
-
-highest_overrun = category_variance.idxmax()
-
-if category_variance.max() > 0:
+if not overruns.empty:
+    highest = overruns.idxmax()
     st.warning(
-        f"Review {highest_overrun}: it has the largest "
-        "positive budget variance."
+        f"Review **{highest}**: it has the largest overspending "
+        f"of {overruns[highest]:,.0f}."
     )
 else:
-    st.success("No cost category exceeded its budget.")
+    st.success("No selected category exceeded its budget.")
+
+if variance < 0:
+    st.info(f"Actual expenses are {abs(variance):,.0f} below the selected budget.")
+elif variance > 0:
+    st.warning(f"Actual expenses exceed the selected budget by {variance:,.0f}.")
+else:
+    st.success("Actual expenses match the selected budget.")
