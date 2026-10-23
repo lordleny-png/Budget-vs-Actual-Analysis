@@ -133,6 +133,41 @@ monthly_chart.update_layout(
 )
 st.plotly_chart(monthly_chart, use_container_width=True)
 
+# Monthly Variance Trend
+st.subheader("📈 Monthly Spending Variance")
+
+monthly["Variance"] = monthly["Actual"] - monthly["Budget"]
+
+monthly["Status"] = monthly["Variance"].apply(
+    lambda x: "Overspending" if x > 0
+    else "Under Budget" if x < 0
+    else "On Budget"
+)
+
+variance_chart = px.bar(
+    monthly,
+    x="Month",
+    y="Variance",
+    color="Status",
+    color_discrete_map={
+        "Overspending": "#E63946",
+        "Under Budget": "#2A9D8F",
+        "On Budget": "#4361EE"
+    },
+    template="plotly_white",
+    title="Actual Expenses minus Budget"
+)
+
+variance_chart.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Variance",
+    showlegend=True
+)
+
+st.plotly_chart(variance_chart, use_container_width=True)
+
+
+
 # Category analysis
 st.subheader("💰 Variance by Cost Category")
 
