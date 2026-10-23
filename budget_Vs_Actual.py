@@ -85,7 +85,10 @@ selected_categories = st.sidebar.multiselect(
 )
 
 if not selected_months or not selected_categories:
-    st.warning("Please select at least one month and one category.")
+    st.warning(
+        "Please select at least one month and one cost category "
+        "using the filters in the left sidebar."
+    )
     st.stop()
 
 # Filter data
